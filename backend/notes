@@ -1,0 +1,24 @@
+product:
+  * name
+  * price (per product)
+  * quantity
+  * state [waiting, placed, dispatched, cancelled]
+    image
+  * vendorId
+    review
+    rating
+
+user:
+  * isVendor
+  * email
+  * username
+  * password
+    rating
+    reviews
+
+order:
+  * productId
+  * customerId
+  * quantity
+
+# * means required field
