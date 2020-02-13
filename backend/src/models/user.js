@@ -1,27 +1,23 @@
 const mongoose = require("mongoose");
 
-function userSchemaGenerator(extraArgs=null) {
-    const userSchema = new mongoose.Schema({
-        email: {
-            type: String,
-            required: true,
-        },
-        password: {
-            type: String,
-            required: true,
-        },
-    });
+const userSchema = new mongoose.Schema({
+    isVendor: {
+        type: Boolean,
+        required: true,
+    },
+    username: {
+        type: String,
+        required: true,
+        unique: true,
+    },
+    password: {
+        type: String,
+        required: true,
+    },
+    rating: String,
+    reviews: [String],
+});
 
-    if (extraArgs)
-        userSchema.add(extraArgs);
+const User = mongoose.model("User", userSchema);
 
-    return userSchema;
-}
-
-const Vendor = userSchemaGenerator({ rating: String, reviews: [String] }),
-    User = userSchemaGenerator();
-
-module.exports = {
-    Vendor,
-    User
-};
+module.exports = User;

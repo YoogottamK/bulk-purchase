@@ -17,11 +17,13 @@ const productSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
-    image: String,
     vendorId: {
         type: String,
         required: true,
     },
+    rating: Number,
+    reviews: [String],
+    image: String,
 });
 
 const Product = mongoose.model("Product", productSchema);
