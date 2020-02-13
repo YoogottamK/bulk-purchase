@@ -1,6 +1,7 @@
-const express = require("express");
+const init = require("./init");
 
-const app = express(),
+init.initMongoose();
+const app = init.initExpress(),
     port = 5000;
 
 app.get("/", (_req, res) => {
