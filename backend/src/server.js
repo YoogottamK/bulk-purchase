@@ -1,6 +1,6 @@
 const init = require("./init");
 
-const login = require("./routes/api/login");
+const login = require("./routes/api/user");
 
 init.initMongoose();
 const app = init.initExpress(),
@@ -13,7 +13,7 @@ app.get("/", (_req, res) => {
     res.send("Backend is up!");
 });
 
-app.use("/api/login", login);
+app.use("/api/user", login);
 
 app.listen(port, () => {
     console.log(`Server started on port ${port}`);
