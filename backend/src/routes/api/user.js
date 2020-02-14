@@ -15,7 +15,7 @@ const User = require("../../models/user");
 const secrets = require("../../config/secrets");
 
 /*
- * @route POST api/user/register
+ * @route POST user/register
  * @desc Manage user registration and add to db
  * @access Public
  */
@@ -26,14 +26,24 @@ router.post("/register", (req, res) => {
         return res.status(HttpStatusCodes.BAD_REQUEST).json(errors);
     }
 
-    User.findOne({ email: req.body.email }).then(user => {
+    const username = req.body.username,
+        email = req.body.email,
+        password = req.body.password,
+        isVendor = req.body.isVendor;
+
+    User.findOne({ email: email }).then(user => {
         if (user) {
             return res
                 .status(HttpStatusCodes.BAD_REQUEST)
                 .json({ email: "Email already exists" });
         }
 
-        const newUser = new User(req.body);
+        const newUser = new User({
+            isVendor: isVendor === "true",
+            username: username,
+            email: email,
+            password: password,
+        });
 
         bcrypt.genSalt(10, (err, salt) => {
             bcrypt.hash(newUser.password, salt, (err, hash) => {
@@ -50,7 +60,7 @@ router.post("/register", (req, res) => {
 });
 
 /*
- * @route POST api/user/login
+ * @route POST user/login
  * @desc Manage login for users and return JWT token
  * @access Public
  */
