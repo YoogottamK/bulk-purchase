@@ -26,10 +26,7 @@ router.post("/register", (req, res) => {
         return res.status(HttpStatusCodes.BAD_REQUEST).json(errors);
     }
 
-    const username = req.body.username,
-        email = req.body.email,
-        password = req.body.password,
-        isVendor = req.body.isVendor;
+    const { username, email, password, isVendor } = req.body;
 
     User.findOne({ email: email }).then(user => {
         if (user) {
@@ -71,8 +68,7 @@ router.post("/login", (req, res) => {
         return res.status(HttpStatusCodes.BAD_REQUEST).json(errors);
     }
 
-    const email = req.body.email,
-        password = req.body.password;
+    const { email, password } = req.body;
 
     User.findOne({ email: email }).then(user => {
         if (!user) {
