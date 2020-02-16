@@ -7,6 +7,7 @@ import {
   faChevronLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
+
 import "../style/Register.css";
 
 class Login extends Component {
