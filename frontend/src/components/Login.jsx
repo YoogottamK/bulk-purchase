@@ -7,6 +7,10 @@ import {
   faChevronLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
+import PropTypes from "prop-types";
+import { connect } from "react-redux";
+
+import { userLogin } from "../actions/authActions";
 
 import "../style/Register.css";
 
@@ -25,12 +29,9 @@ class Login extends Component {
   }
 
   onChange(e) {
-    this.setState(
-      {
-        [e.target.id]: e.target.value,
-      },
-      () => console.log(this.state)
-    );
+    this.setState({
+      [e.target.id]: e.target.value,
+    });
   }
 
   onSubmit(e) {
@@ -42,6 +43,24 @@ class Login extends Component {
     };
 
     console.log(loginDetails);
+    this.props.userLogin(loginDetails);
+  }
+
+  // eslint-disable-next-line
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.auth.isAuthenticated) {
+      this.props.history.push("/home");
+    }
+
+    if (nextProps.errors) {
+      this.setState({ errors: nextProps.errors });
+    }
+  }
+
+  componentDidMount() {
+    if (this.props.auth.isAuthenticated) {
+      this.props.history.push("/home");
+    }
   }
 
   render() {
@@ -72,6 +91,9 @@ class Login extends Component {
                     error={errors.email}
                     required
                   />
+                  <span className="text-danger text-right w-100 d-block">
+                    {errors.email}
+                  </span>
                 </Col>
               </Form.Group>
               <Form.Group as={Row} controlId="password">
@@ -87,8 +109,14 @@ class Login extends Component {
                     value={this.state.password}
                     required
                   />
+                  <span className="text-danger text-right w-100 d-block">
+                    {errors.password}
+                  </span>
                 </Col>
               </Form.Group>
+              <span className="text-danger text-right w-100 d-block">
+                {errors.accountNotFound}
+              </span>
               <Row>
                 <Col>
                   <Button
@@ -125,4 +153,15 @@ class Login extends Component {
   }
 }
 
-export default Login;
+Login.propTypes = {
+  userLogin: PropTypes.func.isRequired,
+  auth: PropTypes.object.isRequired,
+  errors: PropTypes.object.isRequired,
+};
+
+const mapStateToProps = state => ({
+  auth: state.auth,
+  errors: state.errors,
+});
+
+export default connect(mapStateToProps, { userLogin })(Login);

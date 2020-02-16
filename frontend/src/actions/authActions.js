@@ -15,12 +15,13 @@ export const userRegister = (userData, history) => dispatch => {
   axios
     .post("/user/register", userData)
     .then(res => history.push("/login"))
-    .catch(err =>
+    .catch(err => {
+      console.log(err.response.data);
       dispatch({
         type: ERROR,
         payload: err.response.data,
-      })
-    );
+      });
+    });
 };
 
 export const userLogin = userData => dispatch => {
@@ -33,7 +34,10 @@ export const userLogin = userData => dispatch => {
       const decoded = jwt_decode(token);
       dispatch(setUser(decoded));
     })
-    .catch(err => dispatch({ type: ERROR, payload: err.response.data }));
+    .catch(err => {
+      console.log(err.response.data);
+      dispatch({ type: ERROR, payload: err.response.data });
+    });
 };
 
 export const setUserLoading = () => {

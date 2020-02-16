@@ -7,7 +7,11 @@ import {
   faEnvelope,
   faChevronLeft,
 } from "@fortawesome/free-solid-svg-icons";
-import { Link } from "react-router-dom";
+import { Link, withRouter } from "react-router-dom";
+import PropTypes from "prop-types";
+import { connect } from "react-redux";
+import { userRegister } from "../actions/authActions";
+
 import "../style/Register.css";
 
 class Register extends Component {
@@ -28,13 +32,10 @@ class Register extends Component {
   }
 
   onChange(e) {
-    this.setState(
-      {
-        [e.target.id]:
-          e.target.type === "checkbox" ? e.target.checked : e.target.value,
-      },
-      () => console.log(this.state)
-    );
+    this.setState({
+      [e.target.id]:
+        e.target.type === "checkbox" ? e.target.checked : e.target.value,
+    });
   }
 
   onSubmit(e) {
@@ -48,7 +49,20 @@ class Register extends Component {
       isVendor: this.state.isVendor,
     };
 
-    console.log(newUser);
+    this.props.userRegister(newUser, this.props.history);
+  }
+
+  // eslint-disable-next-line
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.errors) {
+      this.setState({ errors: nextProps.errors });
+    }
+  }
+
+  componentDidMount() {
+    if (this.props.auth.isAuthenticated) {
+      this.props.history.push("/home");
+    }
   }
 
   render() {
@@ -79,6 +93,9 @@ class Register extends Component {
                     error={errors.username}
                     required
                   />
+                  <span className="text-danger text-right w-100 d-block">
+                    {errors.username}
+                  </span>
                 </Col>
               </Form.Group>
               <Form.Group as={Row} controlId="email">
@@ -95,6 +112,9 @@ class Register extends Component {
                     error={errors.email}
                     required
                   />
+                  <span className="text-danger text-right w-100 d-block">
+                    {errors.email}
+                  </span>
                 </Col>
               </Form.Group>
               <Form.Group as={Row} controlId="password">
@@ -110,6 +130,9 @@ class Register extends Component {
                     value={this.state.password}
                     required
                   />
+                  <span className="text-danger text-right w-100 d-block">
+                    {errors.password}
+                  </span>
                 </Col>
               </Form.Group>
               <Form.Group as={Row} controlId="password2">
@@ -125,6 +148,9 @@ class Register extends Component {
                     value={this.state.password2}
                     required
                   />
+                  <span className="text-danger text-right w-100 d-block">
+                    {errors.password2}
+                  </span>
                 </Col>
               </Form.Group>
               <Form.Group
@@ -141,7 +167,6 @@ class Register extends Component {
                     type="checkbox"
                     onChange={this.onChange}
                     checked={this.state.isVendor}
-                    required
                   />
                 </Col>
               </Form.Group>
@@ -181,4 +206,15 @@ class Register extends Component {
   }
 }
 
-export default Register;
+Register.propTypes = {
+  userRegister: PropTypes.func.isRequired,
+  auth: PropTypes.object.isRequired,
+  errors: PropTypes.object.isRequired,
+};
+
+const mapStateToProps = state => ({
+  auth: state.auth,
+  errors: state.errors,
+});
+
+export default connect(mapStateToProps, { userRegister })(withRouter(Register));
