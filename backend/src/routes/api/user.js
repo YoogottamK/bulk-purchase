@@ -20,6 +20,7 @@ const secrets = require("../../config/secrets");
  * @access Public
  */
 router.post("/register", (req, res) => {
+    console.log("---\n/register\n", req.body, "\n---");
     const { errors, isValid } = validateRegisterInput(req.body);
 
     if (!isValid) {
@@ -62,6 +63,7 @@ router.post("/register", (req, res) => {
  * @access Public
  */
 router.post("/login", (req, res) => {
+    console.log("---\n/login\n", req.body, "\n---");
     const { errors, isValid } = validateLoginInput(req.body);
 
     if (!isValid) {
@@ -99,8 +101,7 @@ router.post("/login", (req, res) => {
                 );
             } else {
                 return res.status(HttpStatusCodes.BAD_REQUEST).json({
-                    passwordIncorrect:
-                        "The password you provided seems to be incorrect",
+                    password: "The password you provided seems to be incorrect",
                 });
             }
         });
