@@ -10,7 +10,10 @@ class Home extends Component {
 
     return (
       <Container>
-        <h1>Hello {user.username}</h1>
+        <h1>
+          Hello {user.username}::
+          {user.isVendor ? "vendor" : "customer"}
+        </h1>
       </Container>
     );
   }

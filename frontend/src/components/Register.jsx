@@ -73,7 +73,7 @@ class Register extends Component {
         <div className="form-container text-center">
           <div className="back">
             <Link to="/">
-              <FontAwesomeIcon icon={faChevronLeft} /> BACK TO HOME
+              <FontAwesomeIcon icon={faChevronLeft} /> BACK
             </Link>
           </div>
           <h1 className="form-header">Create account</h1>

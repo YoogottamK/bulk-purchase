@@ -42,7 +42,6 @@ class Login extends Component {
       password: this.state.password,
     };
 
-    console.log(loginDetails);
     this.props.userLogin(loginDetails);
   }
 
@@ -71,7 +70,7 @@ class Login extends Component {
         <div className="form-container text-center">
           <div className="back">
             <Link to="/">
-              <FontAwesomeIcon icon={faChevronLeft} /> BACK TO HOME
+              <FontAwesomeIcon icon={faChevronLeft} /> BACK
             </Link>
           </div>
           <h1 className="form-header">Login to your account</h1>
