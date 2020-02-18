@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Route } from "react-router-dom";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import { Provider } from "react-redux";
 import jwt_decode from "jwt-decode";
 
@@ -7,11 +7,17 @@ import store from "./store";
 import setAuthToken from "./utils/setAuthToken";
 import { setUser, userLogout } from "./actions/authActions";
 
+import Protected from "./components/Protected";
+
 import AppNavbar from "./components/Navbar";
+
+import Landing from "./components/Landing";
 import Register from "./components/Register";
 import Login from "./components/Login";
-import Landing from "./components/Landing";
+
 import Home from "./components/Home";
+
+import _404 from "./components/_404";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./style/App.css";
@@ -34,14 +40,17 @@ function App() {
   return (
     <Provider store={store}>
       <AppNavbar />
-      <div>
+      <>
         <Router>
-          <Route exact path="/" component={Landing} />
-          <Route exact path="/register" component={Register} />
-          <Route exact path="/login" component={Login} />
-          <Route exact path="/home" component={Home} />
+          <Switch>
+            <Route exact path="/" component={Landing} />
+            <Route exact path="/register" component={Register} />
+            <Route exact path="/login" component={Login} />
+            <Protected exact path="/home" component={Home} />
+            <Route component={_404} />
+          </Switch>
         </Router>
-      </div>
+      </>
     </Provider>
   );
 }
