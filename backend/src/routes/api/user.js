@@ -37,7 +37,7 @@ router.post("/register", (req, res) => {
         }
 
         const newUser = new User({
-            isVendor: isVendor === "true",
+            isVendor: isVendor,
             username: username,
             email: email,
             password: password,
