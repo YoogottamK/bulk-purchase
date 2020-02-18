@@ -7,6 +7,7 @@ import store from "./store";
 import setAuthToken from "./utils/setAuthToken";
 import { setUser, userLogout } from "./actions/authActions";
 
+import AppNavbar from "./components/Navbar";
 import Register from "./components/Register";
 import Login from "./components/Login";
 import Landing from "./components/Landing";
@@ -32,6 +33,7 @@ if (localStorage.jwt) {
 function App() {
   return (
     <Provider store={store}>
+      <AppNavbar />
       <div>
         <Router>
           <Route exact path="/" component={Landing} />
