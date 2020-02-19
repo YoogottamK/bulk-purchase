@@ -5,6 +5,7 @@ import {
   Table,
   InputGroup,
   FormControl,
+  Dropdown,
 } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft, faSearch } from "@fortawesome/free-solid-svg-icons";
@@ -15,12 +16,20 @@ class CreateOrder extends Component {
   constructor() {
     super();
 
+    this.sorters = {
+      price: (a, b) => a.price > b.price,
+      quantity: (a, b) => a.quantity > b.quantity,
+      rating: (a, b) => a.rating > b.rating,
+    };
+
     this.state = {
       searchString: "",
       products: [],
+      sorter: (a, b) => false,
     };
 
     this.updateSearch = this.updateSearch.bind(this);
+    this.updateSort = this.updateSort.bind(this);
   }
 
   fetchProducts() {
@@ -39,6 +48,10 @@ class CreateOrder extends Component {
 
   updateSearch(e) {
     this.setState({ [e.target.id]: e.target.value });
+  }
+
+  updateSort(e) {
+    this.setState({ sorter: this.sorters[e.target.name] });
   }
 
   render() {
@@ -62,6 +75,24 @@ class CreateOrder extends Component {
             onChange={this.updateSearch}
           />
         </InputGroup>
+        <Dropdown>
+          <Dropdown.Toggle variant="primary">Sort by</Dropdown.Toggle>
+          <Dropdown.Menu>
+            <Dropdown.Item
+              as={Button}
+              onClick={this.updateSort}
+              name="quantity"
+            >
+              Quantity
+            </Dropdown.Item>
+            <Dropdown.Item as={Button} onClick={this.updateSort} name="price">
+              Price
+            </Dropdown.Item>
+            <Dropdown.Item as={Button} onClick={this.updateSort} name="rating">
+              Rating
+            </Dropdown.Item>
+          </Dropdown.Menu>
+        </Dropdown>
         <Table
           striped
           bordered
@@ -85,6 +116,7 @@ class CreateOrder extends Component {
           <tbody>
             {this.state.products
               .filter(product => product.name.includes(this.state.searchString))
+              .sort(this.state.sorter)
               .map((product, index) => (
                 <tr key={index}>
                   <td className="align-middle">{index}</td>
@@ -98,8 +130,8 @@ class CreateOrder extends Component {
                   <td className="align-middle">{product.name}</td>
                   <td className="align-middle">{product.price}</td>
                   <td className="align-middle">{product.quantity}</td>
-                  <td className="align-middle"></td>
-                  <td className="align-middle"></td>
+                  <td className="align-middle">{product.vendorId.username}</td>
+                  <td className="align-middle">{product.vendorId.rating}</td>
                   <td className="align-middle">
                     <Button className="btn btn-primary">ORDER</Button>
                   </td>
