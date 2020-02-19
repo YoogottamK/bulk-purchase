@@ -4,15 +4,12 @@ const express = require("express"),
     jwt = require("jsonwebtoken"),
     HttpStatusCodes = require("http-status-codes");
 
-// validators
-const validateRegisterInput = require("../../validation/register"),
-    validateLoginInput = require("../../validation/login");
+const validateRegisterInput = require("../validation/register"),
+    validateLoginInput = require("../validation/login");
 
-// models
-const User = require("../../models/user");
+const User = require("../models/user");
 
-// secrets
-const secrets = require("../../config/secrets");
+const secrets = require("../config/secrets");
 
 /*
  * @route POST user/register
@@ -20,7 +17,7 @@ const secrets = require("../../config/secrets");
  * @access Public
  */
 router.post("/register", (req, res) => {
-    console.log("---\n/register\n", req.body, "\n---");
+    console.log("---\n/user/register\n", req.body, "\n---");
     const { errors, isValid } = validateRegisterInput(req.body);
 
     if (!isValid) {
@@ -63,7 +60,7 @@ router.post("/register", (req, res) => {
  * @access Public
  */
 router.post("/login", (req, res) => {
-    console.log("---\n/login\n", req.body, "\n---");
+    console.log("---\n/user/login\n", req.body, "\n---");
     const { errors, isValid } = validateLoginInput(req.body);
 
     if (!isValid) {
