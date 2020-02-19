@@ -22,7 +22,7 @@ router.use(userTypeMiddleware.customer);
 router.get("/", (req, res) => {
     console.log("---\n/order\n", req.body, "\n---");
 
-    Product.find({})
+    Product.find({ quantity: { $gt: 0 } })
         .populate("vendorId")
         .exec((err, docs) => {
             if (err) {
@@ -87,16 +87,24 @@ router.post("/new", (req, res) => {
                     quantity: quantity,
                 });
 
+                const productUpdates = {
+                    quantity: remaining,
+                    state:
+                        remaining == 0
+                            ? constants.PRODUCT_STATE["PLACED"]
+                            : constants.PRODUCT_STATE["WAITING"],
+                };
+
                 newOrder
                     .save()
                     .then(order => {
                         Product.findOneAndUpdate(
                             { _id: productId },
-                            { quantity: remaining },
+                            productUpdates,
                             (err, doc) => {
                                 if (err) {
                                     return res
-                                        .json(
+                                        .send(
                                             HttpStatusCodes.INTERNAL_SERVER_ERROR
                                         )
                                         .json(err);
@@ -112,6 +120,94 @@ router.post("/new", (req, res) => {
                             .json(err);
                     });
             }
+        }
+    });
+});
+
+/*
+ * @route POST /order/update
+ * @desc Update the order placed by client
+ * @access Restricted
+ */
+router.post("/update", (req, res) => {
+    console.log("---\n/order/update\n", req.body, "\n---");
+
+    const { errors, isValid } = validateAddOrderInput(req.body);
+
+    if (!isValid) {
+        return res.status(HttpStatusCodes.UNPROCESSABLE_ENTITY).json(errors);
+    }
+
+    let { orderId, quantity, userDetails } = req.body;
+
+    Order.findById(orderId, (err, data) => {
+        if (err) {
+            console.log(err);
+            return res.status(HttpStatusCodes.UNPROCESSABLE_ENTITY).json(err);
+        } else {
+            const currentQuantity = data.quantity;
+            Product.findById(data.productId, (err, data) => {
+                if (err) {
+                    console.log(err);
+                    return res
+                        .status(HttpStatusCodes.UNPROCESSABLE_ENTITY)
+                        .json(err);
+                } else {
+                    const remaining =
+                        data.quantity - quantity + currentQuantity;
+                    if (remaining < 0) {
+                        return res.status(HttpStatusCodes.BAD_REQUEST).json({
+                            quantity: "You cant order more than available",
+                        });
+                    } else {
+                        Order.findOneAndUpdate(
+                            { _id: orderId },
+                            { quantity: quantity },
+                            (err, doc) => {
+                                if (err) {
+                                    console.log(err);
+                                    return res
+                                        .send(
+                                            HttpStatusCodes.INTERNAL_SERVER_ERROR
+                                        )
+                                        .json(err);
+                                } else {
+                                    const productUpdates = {
+                                        quantity: remaining,
+                                        state:
+                                            remaining == 0
+                                                ? constants.PRODUCT_STATE[
+                                                      "PLACED"
+                                                  ]
+                                                : constants.PRODUCT_STATE[
+                                                      "WAITING"
+                                                  ],
+                                    };
+
+                                    Product.findOneAndUpdate(
+                                        { _id: data._id },
+                                        productUpdates,
+                                        (err, doc) => {
+                                            if (err) {
+                                                console.log(err);
+                                                return res
+                                                    .send(
+                                                        HttpStatusCodes.INTERNAL_SERVER_ERROR
+                                                    )
+                                                    .json(err);
+                                            } else {
+                                                res.sendStatus(
+                                                    HttpStatusCodes.OK
+                                                );
+                                            }
+                                        }
+                                    );
+                                }
+                            }
+                        );
+                    }
+                }
+            });
         }
     });
 });
