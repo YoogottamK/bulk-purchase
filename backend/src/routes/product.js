@@ -15,20 +15,24 @@ router.use(userTypeMiddleware.vendor);
 
 /*
  * @route GET /product
- * @desc Get all products
+ * @desc Get all products which have quantity > 0
  * @access Restricted
  */
 router.get("/", (req, res) => {
     console.log("---\n/product\n", req.body, "\n---");
     const { userDetails } = req.body;
 
-    Product.find({ vendorId: userDetails.id }, null, (err, docs) => {
-        if (err) {
-            console.log(err);
-        } else {
-            res.json(docs);
+    Product.find(
+        { vendorId: userDetails.id, quantity: { $gt: 0 } },
+        null,
+        (err, docs) => {
+            if (err) {
+                console.log(err);
+            } else {
+                res.json(docs);
+            }
         }
-    });
+    );
 });
 
 /*
