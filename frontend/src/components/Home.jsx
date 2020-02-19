@@ -4,16 +4,19 @@ import { Container } from "react-bootstrap";
 import { connect } from "react-redux";
 import { userLogout } from "../actions/authActions";
 
+// TODO: refactor this
+import VendorActions from "./VendorActions";
+import CustomerActions from "./CustomerActions";
+
 class Home extends Component {
   render() {
     const { user } = this.props.auth;
 
     return (
       <Container>
-        <h1>
-          Hello {user.username}::
-          {user.isVendor ? "vendor" : "customer"}
-        </h1>
+        <h1>Welcome, {user.username}</h1>
+        <div className="pb-5">Here is a list of actions you can perform:</div>
+        {user.isVendor ? <VendorActions /> : <CustomerActions />}
       </Container>
     );
   }

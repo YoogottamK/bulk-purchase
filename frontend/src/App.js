@@ -7,8 +7,11 @@ import store from "./store";
 import setAuthToken from "./utils/setAuthToken";
 import { setUser, userLogout } from "./actions/authActions";
 
-import Protected from "./components/Protected";
+// Special routes
+import LoggedInRoute from "./components/LoggedInRoute";
+import RestrictedRoute from "./components/RestrictedRoute";
 
+// Components
 import AppNavbar from "./components/Navbar";
 
 import Landing from "./components/Landing";
@@ -18,6 +21,9 @@ import Login from "./components/Login";
 import Home from "./components/Home";
 
 import _404 from "./components/_404";
+
+import NewOrder from "./components/NewOrder";
+import MyOrder from "./components/MyOrder";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./style/App.css";
@@ -32,7 +38,7 @@ if (localStorage.jwt) {
   const currentTime = Date.now() / 1000;
   if (decoded.exp < currentTime) {
     store.dispatch(userLogout());
-    window.location.href = "./login";
+    window.location.href = "/login";
   }
 }
 
@@ -46,7 +52,26 @@ function App() {
             <Route exact path="/" component={Landing} />
             <Route exact path="/register" component={Register} />
             <Route exact path="/login" component={Login} />
-            <Protected exact path="/home" component={Home} />
+            <LoggedInRoute exact path="/home" component={Home} />
+
+            <LoggedInRoute exact path="/order/new" component={NewOrder} />
+            <LoggedInRoute exact path="/order/my" component={MyOrder} />
+
+            {/* TODO: finish all fo this */}
+            <RestrictedRoute
+              exact
+              path="/order/dispatchable"
+              isVendorRoute
+              component={Home}
+            />
+
+            <RestrictedRoute
+              exact
+              path="/order/dispatched"
+              isVendorRoute
+              component={Home}
+            />
+
             <Route component={_404} />
           </Switch>
         </Router>
