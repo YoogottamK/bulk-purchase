@@ -2,11 +2,12 @@ const express = require("express"),
     router = express.Router(),
     HttpStatusCodes = require("http-status-codes");
 
-const validateAddProductInput = require("../validation/addProduct"),
+const validateAddOrderInput = require("../validation/addOrder"),
     tokenValidatorMiddleware = require("../validation/tokenValidatorMiddleware"),
     userTypeMiddleware = require("../validation/userTypeMiddleware");
 
-const Product = require("../models/product");
+const Product = require("../models/product"),
+    Order = require("../models/order");
 
 const constants = require("../config/constants");
 
@@ -34,55 +35,85 @@ router.get("/", (req, res) => {
 });
 
 /*
+ * @route GET /order/my
+ * @desc Gets all orders placed by the client
+ * @access Restricted
+ */
+router.get("/my", (req, res) => {
+    console.log("---\n/order/my\n", req.body, "\n---");
+
+    Order.find({ customerId: req.body.userDetails.id })
+        .populate("productId")
+        .exec((err, docs) => {
+            if (err) {
+                console.log(err);
+                res.send(HttpStatusCodes.INTERNAL_SERVER_ERROR).json(err);
+            } else {
+                res.json(docs);
+            }
+        });
+});
+
+/*
  * @route POST /order/new
- * @desc Create new order
+ * @desc Place new order
  * @access Restricted
  */
 router.post("/new", (req, res) => {
     console.log("---\n/order/new\n", req.body, "\n---");
-    const { errors, isValid } = validateAddProductInput(req.body);
+    const { errors, isValid } = validateAddOrderInput(req.body);
 
     if (!isValid) {
-        return res.status(HttpStatusCodes.BAD_REQUEST).json(errors);
+        return res.status(HttpStatusCodes.UNPROCESSABLE_ENTITY).json(errors);
     }
 
-    let { name, price, quantity, image, userDetails } = req.body;
+    let { productId, quantity, userDetails } = req.body;
 
-    price = parseInt(price);
-    quantity = parseInt(quantity);
+    Product.findById(productId, (err, data) => {
+        if (err) {
+            console.log(err);
+            return res.status(HttpStatusCodes.UNPROCESSABLE_ENTITY).json(err);
+        } else {
+            const remaining = data.quantity - quantity;
 
-    const newProduct = new Product({
-        name: name,
-        price: price,
-        quantity: quantity,
-        state: constants.PRODUCT_STATE["WAITING"],
-        vendorId: userDetails.id,
-        image: image,
+            if (remaining < 0) {
+                return res.status(HttpStatusCodes.UNPROCESSABLE_ENTITY).json({
+                    quantity: "You cant order more than available",
+                });
+            } else {
+                const newOrder = new Order({
+                    productId: productId,
+                    customerId: userDetails.id,
+                    quantity: quantity,
+                });
+
+                newOrder
+                    .save()
+                    .then(order => {
+                        Product.findOneAndUpdate(
+                            { _id: productId },
+                            { quantity: remaining },
+                            (err, doc) => {
+                                if (err) {
+                                    return res
+                                        .json(
+                                            HttpStatusCodes.INTERNAL_SERVER_ERROR
+                                        )
+                                        .json(err);
+                                }
+                                res.json(order);
+                            }
+                        );
+                    })
+                    .catch(err => {
+                        console.log(err);
+                        return res
+                            .send(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+                            .json(err);
+                    });
+            }
+        }
     });
-
-    newProduct
-        .save()
-        .then(product => res.json(product))
-        .catch(err => console.log(err));
-
-    console.log(name, price, quantity, image, userDetails);
-});
-
-/*
- * @route DELETE /product/:id
- * @desc delete a product owned by this vendor
- * @access Restricted
- */
-router.delete("/:id", (req, res) => {
-    const productId = req.params.id;
-
-    console.log("---\n/order/:id\n", req.body, "\n", productId, "\n---");
-
-    Product.deleteOne({ _id: productId }).then(err => {
-        if (err) res.send(HttpStatusCodes.INTERNAL_SERVER_ERROR).json(err);
-    });
-
-    return res.sendStatus(HttpStatusCodes.OK);
 });
 
 module.exports = router;
