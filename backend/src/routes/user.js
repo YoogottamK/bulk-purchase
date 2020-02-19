@@ -21,7 +21,7 @@ router.post("/register", (req, res) => {
     const { errors, isValid } = validateRegisterInput(req.body);
 
     if (!isValid) {
-        return res.status(HttpStatusCodes.BAD_REQUEST).json(errors);
+        return res.status(HttpStatusCodes.UNPROCESSABLE_ENTITY).json(errors);
     }
 
     const { username, email, password, isVendor } = req.body;
@@ -64,7 +64,7 @@ router.post("/login", (req, res) => {
     const { errors, isValid } = validateLoginInput(req.body);
 
     if (!isValid) {
-        return res.status(HttpStatusCodes.BAD_REQUEST).json(errors);
+        return res.status(HttpStatusCodes.UNPROCESSABLE_ENTITY).json(errors);
     }
 
     const { email, password } = req.body;
