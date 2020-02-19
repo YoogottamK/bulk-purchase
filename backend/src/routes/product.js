@@ -41,7 +41,7 @@ router.post("/new", (req, res) => {
     const { errors, isValid } = validateAddProductInput(req.body);
 
     if (!isValid) {
-        return res.status(HttpStatusCodes.BAD_REQUEST).json(errors);
+        return res.status(HttpStatusCodes.UNPROCESSABLE_ENTITY).json(errors);
     }
 
     let { name, price, quantity, image, userDetails } = req.body;
