@@ -60,16 +60,14 @@ class ViewOrder extends Component {
       quantity: `${this.state.quantity}`,
     };
 
-    console.log(orderDetails);
-
     axios
       .post("/order/update", orderDetails)
       .then(data => {
         alert("Order updated successfully");
 
         this.setState({
+          isOrdering: false,
           orderId: -1,
-          quantity: 1,
         });
 
         this.fetchOrders();
@@ -123,13 +121,17 @@ class ViewOrder extends Component {
                 <td className="align-middle">{order.productId.quantity}</td>
                 <td className="align-middle">{order.rating}</td>
                 <td className="align-middle">
-                  <Button
-                    className="btn btn-primary"
-                    name={index}
-                    onClick={this.editOrder}
-                  >
-                    EDIT
-                  </Button>
+                  {order.state === 0 ? (
+                    <Button
+                      className="btn btn-primary"
+                      name={index}
+                      onClick={this.editOrder}
+                    >
+                      EDIT
+                    </Button>
+                  ) : (
+                    <></>
+                  )}
                 </td>
               </tr>
             ))}
@@ -164,7 +166,11 @@ class ViewOrder extends Component {
                   value={this.state.quantity}
                   error={this.state.errors.quantity}
                   min={1}
-                  max={this.state.orders[this.state.orderId].productId.quantity}
+                  max={
+                    parseInt(
+                      this.state.orders[this.state.orderId].productId.quantity
+                    ) + parseInt(this.state.orders[this.state.orderId].quantity)
+                  }
                   required
                 />
                 <span className="text-danger text-right w-100 d-block">
