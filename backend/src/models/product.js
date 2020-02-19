@@ -23,6 +23,7 @@ const productSchema = new mongoose.Schema({
         required: true,
     },
     rating: Number,
+    totalRating: Number,
     reviews: [String],
     image: String,
 });
