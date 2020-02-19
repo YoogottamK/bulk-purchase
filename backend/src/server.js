@@ -1,6 +1,8 @@
 const init = require("./init");
 
-const login = require("./routes/api/user");
+const login = require("./routes/user"),
+    product = require("./routes/product"),
+    order = require("./routes/order");
 
 init.initMongoose();
 const app = init.initExpress(),
@@ -14,6 +16,8 @@ app.get("/", (_req, res) => {
 });
 
 app.use("/user", login);
+app.use("/product", product);
+app.use("/order", order);
 
 app.listen(port, () => {
     console.log(`Server started on port ${port}`);

@@ -19,6 +19,10 @@ const userSchema = new mongoose.Schema({
         required: true,
     },
     rating: String,
+    totalRating: {
+        type: Number,
+        default: 0,
+    },
     reviews: [String],
 });
 
