@@ -4,15 +4,23 @@ import {
   Container,
   Table,
   InputGroup,
+  Form,
   FormControl,
   Dropdown,
+  Row,
+  Col,
 } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronLeft, faSearch } from "@fortawesome/free-solid-svg-icons";
+import {
+  faChevronLeft,
+  faSearch,
+  faShoppingCart,
+  faClone,
+} from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
 import axios from "axios";
 
-class CreateOrder extends Component {
+class PlaceOrder extends Component {
   constructor() {
     super();
 
@@ -26,13 +34,20 @@ class CreateOrder extends Component {
       searchString: "",
       products: [],
       sorter: (a, b) => false,
+      isOrdering: false,
+      productId: -1,
+      quantity: 1,
+      errors: {},
     };
 
     this.updateSearch = this.updateSearch.bind(this);
     this.updateSort = this.updateSort.bind(this);
+    this.readyOrder = this.readyOrder.bind(this);
+    this.onChange = this.onChange.bind(this);
+    this.placeOrder = this.placeOrder.bind(this);
   }
 
-  fetchProducts() {
+  fetchOrders() {
     axios
       .get("/order")
       .then(data => {
@@ -43,7 +58,7 @@ class CreateOrder extends Component {
 
   // eslint-disable-next-line
   componentWillMount() {
-    this.fetchProducts();
+    this.fetchOrders();
   }
 
   updateSearch(e) {
@@ -54,9 +69,41 @@ class CreateOrder extends Component {
     this.setState({ sorter: this.sorters[e.target.name] });
   }
 
+  readyOrder(e) {
+    this.setState({ isOrdering: true, productId: e.target.name });
+  }
+
+  onChange(e) {
+    this.setState({ quantity: e.target.value });
+  }
+
+  placeOrder(e) {
+    e.preventDefault();
+
+    const orderDetails = {
+      productId: this.state.products[this.state.productId]._id,
+      quantity: `${this.state.quantity}`,
+    };
+
+    axios
+      .post("/order/new", orderDetails)
+      .then(data => {
+        alert("Order placed successfully");
+
+        this.setState({
+          isOrdering: false,
+          productId: -1,
+          quantity: 1,
+        });
+
+        this.fetchOrders();
+      })
+      .catch(err => console.log(err));
+  }
+
   render() {
     return (
-      <Container>
+      <Container className="generic-container">
         <div className="back py-3">
           <Link to="/home">
             <FontAwesomeIcon icon={faChevronLeft} /> BACK
@@ -70,7 +117,7 @@ class CreateOrder extends Component {
           </InputGroup.Prepend>
           <FormControl
             placeholder="search"
-            aria-describedby="basic-addon1"
+            className="form-input"
             id="searchString"
             onChange={this.updateSearch}
           />
@@ -133,15 +180,73 @@ class CreateOrder extends Component {
                   <td className="align-middle">{product.vendorId.username}</td>
                   <td className="align-middle">{product.vendorId.rating}</td>
                   <td className="align-middle">
-                    <Button className="btn btn-primary">ORDER</Button>
+                    <Button
+                      className="btn btn-primary"
+                      name={index}
+                      onClick={this.readyOrder}
+                    >
+                      ORDER
+                    </Button>
                   </td>
                 </tr>
               ))}
           </tbody>
         </Table>
+
+        {this.state.isOrdering ? (
+          <Form className="text-center mx-auto" onSubmit={this.placeOrder}>
+            <Form.Group as={Row} controlId="name">
+              <Form.Label column xs="2">
+                <FontAwesomeIcon icon={faShoppingCart} size="lg" />
+              </Form.Label>
+              <Col xs="10">
+                <Form.Control
+                  className="form-input"
+                  type="text"
+                  value={this.state.products[this.state.productId].name}
+                  disabled
+                />
+              </Col>
+            </Form.Group>
+            <Form.Group as={Row} controlId="quantity">
+              <Form.Label column xs="2">
+                <FontAwesomeIcon icon={faClone} size="lg" />
+              </Form.Label>
+              <Col xs="10">
+                <Form.Control
+                  className="form-input"
+                  type="number"
+                  placeholder="quantity"
+                  onChange={this.onChange}
+                  value={this.state.quantity}
+                  error={this.state.errors.quantity}
+                  min={1}
+                  max={this.state.products[this.state.productId].quantity}
+                  required
+                />
+                <span className="text-danger text-right w-100 d-block">
+                  {this.state.errors.quantity}
+                </span>
+              </Col>
+            </Form.Group>
+            <Row>
+              <Col>
+                <Button
+                  variant="primary"
+                  type="submit"
+                  className="form-submit w-50"
+                >
+                  Place order
+                </Button>
+              </Col>
+            </Row>
+          </Form>
+        ) : (
+          <></>
+        )}
       </Container>
     );
   }
 }
 
-export default CreateOrder;
+export default PlaceOrder;

@@ -1,7 +1,7 @@
-.form-container {
+.form-container,
+.generic-container {
   background: #181818;
   border-radius: 0.5rem;
-
   padding: 2rem;
 }
 

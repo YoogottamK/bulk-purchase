@@ -3,12 +3,12 @@ import PropTypes from "prop-types";
 import { connect } from "react-redux";
 
 import CreateProduct from "./CreateProduct";
-import CreateOrder from "./CreateOrder";
+import PlaceOrder from "./PlaceOrder";
 
 class NewProduct extends Component {
   render() {
     return (
-      <>{this.props.auth.user.isVendor ? <CreateProduct /> : <CreateOrder />}</>
+      <>{this.props.auth.user.isVendor ? <CreateProduct /> : <PlaceOrder />}</>
     );
   }
 }

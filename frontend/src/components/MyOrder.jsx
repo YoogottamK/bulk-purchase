@@ -3,13 +3,13 @@ import PropTypes from "prop-types";
 import { connect } from "react-redux";
 
 import ViewProduct from "./ViewProduct";
+import ViewOrder from "./ViewOrder";
 
 class MyOrder extends Component {
   render() {
-    {
-      /* TODO: implement customer side view */
-    }
-    return <>{this.props.auth.user.isVendor ? <ViewProduct /> : <></>}</>;
+    return (
+      <>{this.props.auth.user.isVendor ? <ViewProduct /> : <ViewOrder />}</>
+    );
   }
 }
 
