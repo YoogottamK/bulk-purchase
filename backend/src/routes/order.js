@@ -21,13 +21,16 @@ router.use(userTypeMiddleware.customer);
 router.get("/", (req, res) => {
     console.log("---\n/order\n", req.body, "\n---");
 
-    Product.find({}, null, (err, docs) => {
-        if (err) {
-            console.log(err);
-        } else {
-            res.json(docs);
-        }
-    });
+    Product.find({})
+        .populate("vendorId")
+        .exec((err, docs) => {
+            if (err) {
+                console.log(err);
+                res.send(HttpStatusCodes.INTERNAL_SERVER_ERROR).json(err);
+            } else {
+                res.json(docs);
+            }
+        });
 });
 
 /*
