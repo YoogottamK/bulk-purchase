@@ -12,7 +12,7 @@ import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { userRegister } from "../actions/authActions";
 
-import "../style/Register.css";
+import "../style/Form.css";
 
 class Register extends Component {
   constructor() {

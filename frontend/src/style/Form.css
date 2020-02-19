@@ -1,0 +1,46 @@
+.form-container {
+  background: #181818;
+  border-radius: 0.5rem;
+
+  padding: 2rem;
+}
+
+.form-header {
+  padding-bottom: 1rem;
+}
+
+.form-submit {
+  margin-top: 1rem;
+}
+
+.form-input {
+  background: #000000 !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: white !important;
+}
+
+.form-input:focus {
+  background: #262626 !important;
+  border-bottom: 2px solid #007bff !important;
+}
+
+.back {
+  text-align: left;
+}
+
+.back a {
+  color: white !important;
+}
+
+input[type="checkbox"].form-control {
+  width: auto;
+  display: block;
+}
+
+@media (max-width: 500px) {
+  input[type="checkbox"].form-control {
+    width: 100%;
+    height: 100%;
+  }
+}

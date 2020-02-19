@@ -12,7 +12,7 @@ import { connect } from "react-redux";
 
 import { userLogin } from "../actions/authActions";
 
-import "../style/Register.css";
+import "../style/Form.css";
 
 class Login extends Component {
   constructor() {
