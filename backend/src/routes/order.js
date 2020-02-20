@@ -22,7 +22,10 @@ router.use(userTypeMiddleware.customer);
 router.get("/", (req, res) => {
     console.log("---\n/order\n", req.body, "\n---");
 
-    Product.find({ quantity: { $gt: 0 } })
+    Product.find({
+        quantity: { $gt: 0 },
+        state: { $ne: constants.PRODUCT_STATE["CANCELLED"] },
+    })
         .populate("vendorId")
         .exec((err, docs) => {
             if (err) {
