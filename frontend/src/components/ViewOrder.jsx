@@ -121,7 +121,7 @@ class ViewOrder extends Component {
                 <td className="align-middle">{order.productId.quantity}</td>
                 <td className="align-middle">{order.rating}</td>
                 <td className="align-middle">
-                  {order.state === 0 ? (
+                  {order.productId.state <= 1 ? (
                     <Button
                       className="btn btn-primary"
                       name={index}
