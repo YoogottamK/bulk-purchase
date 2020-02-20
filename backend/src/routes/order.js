@@ -24,16 +24,18 @@ router.get("/", (req, res) => {
 
     Product.find({
         quantity: { $gt: 0 },
-        state: { $ne: constants.PRODUCT_STATE["CANCELLED"] },
+        state: { $ne: constants.PRODUCT_STATE.CANCELLED },
     })
         .populate("vendorId")
         .exec((err, docs) => {
             if (err) {
                 console.log(err);
-                res.send(HttpStatusCodes.INTERNAL_SERVER_ERROR).json(err);
-            } else {
-                res.json(docs);
+                return res
+                    .send(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+                    .json(err);
             }
+
+            res.json(docs);
         });
 });
 
@@ -50,10 +52,12 @@ router.get("/my", (req, res) => {
         .exec((err, docs) => {
             if (err) {
                 console.log(err);
-                res.send(HttpStatusCodes.INTERNAL_SERVER_ERROR).json(err);
-            } else {
-                res.json(docs);
+                return res
+                    .send(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+                    .json(err);
             }
+
+            res.json(docs);
         });
 });
 
@@ -76,54 +80,53 @@ router.post("/new", (req, res) => {
         if (err) {
             console.log(err);
             return res.status(HttpStatusCodes.UNPROCESSABLE_ENTITY).json(err);
-        } else {
-            const remaining = data.quantity - quantity;
-
-            if (remaining < 0) {
-                return res.status(HttpStatusCodes.UNPROCESSABLE_ENTITY).json({
-                    quantity: "You cant order more than available",
-                });
-            } else {
-                const newOrder = new Order({
-                    productId: productId,
-                    customerId: userDetails.id,
-                    quantity: quantity,
-                });
-
-                const productUpdates = {
-                    quantity: remaining,
-                    state:
-                        remaining == 0
-                            ? constants.PRODUCT_STATE["PLACED"]
-                            : constants.PRODUCT_STATE["WAITING"],
-                };
-
-                newOrder
-                    .save()
-                    .then(order => {
-                        Product.findOneAndUpdate(
-                            { _id: productId },
-                            productUpdates,
-                            (err, doc) => {
-                                if (err) {
-                                    return res
-                                        .send(
-                                            HttpStatusCodes.INTERNAL_SERVER_ERROR
-                                        )
-                                        .json(err);
-                                }
-                                res.json(order);
-                            }
-                        );
-                    })
-                    .catch(err => {
-                        console.log(err);
-                        return res
-                            .send(HttpStatusCodes.INTERNAL_SERVER_ERROR)
-                            .json(err);
-                    });
-            }
         }
+
+        const remaining = data.quantity - quantity;
+
+        if (remaining < 0) {
+            return res.status(HttpStatusCodes.UNPROCESSABLE_ENTITY).json({
+                quantity: "You cant order more than available",
+            });
+        }
+
+        const newOrder = new Order({
+            productId: productId,
+            customerId: userDetails.id,
+            quantity: quantity,
+        });
+
+        const productUpdates = {
+            quantity: remaining,
+            state:
+                remaining == 0
+                    ? constants.PRODUCT_STATE.PLACED
+                    : constants.PRODUCT_STATE.WAITING,
+        };
+
+        newOrder
+            .save()
+            .then(order => {
+                Product.findOneAndUpdate(
+                    { _id: productId },
+                    productUpdates,
+                    err => {
+                        if (err) {
+                            return res
+                                .send(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+                                .json(err);
+                        }
+
+                        res.json(order);
+                    }
+                );
+            })
+            .catch(err => {
+                console.log(err);
+                return res
+                    .send(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+                    .json(err);
+            });
     });
 });
 
@@ -147,89 +150,73 @@ router.post("/update", (req, res) => {
         if (err) {
             console.log(err);
             return res.status(HttpStatusCodes.UNPROCESSABLE_ENTITY).json(err);
-        } else {
-            if (order.customerId != userDetails.id) {
+        }
+
+        if (order.customerId != userDetails.id) {
+            return res
+                .status(HttpStatusCodes.FORBIDDEN)
+                .json({ error: "You can't edit somebody else's orders" });
+        }
+
+        const currentQuantity = order.quantity;
+        Product.findById(order.productId, (err, product) => {
+            if (err) {
+                console.log(err);
                 return res
-                    .status(HttpStatusCodes.FORBIDDEN)
-                    .json({ error: "You can't edit somebody else's orders" });
-            } else {
-                const currentQuantity = order.quantity;
-                Product.findById(order.productId, (err, product) => {
+                    .status(HttpStatusCodes.UNPROCESSABLE_ENTITY)
+                    .json(err);
+            }
+
+            if (product.state > constants.PRODUCT_STATE["PLACED"]) {
+                return res.send(HttpStatusCodes.BAD_REQUEST).json({
+                    error:
+                        "You can't edit an order once it has been dispatched",
+                });
+            }
+
+            const remaining = product.quantity - quantity + currentQuantity;
+            if (remaining < 0) {
+                return res.status(HttpStatusCodes.BAD_REQUEST).json({
+                    quantity: "You cant order more than available",
+                });
+            }
+
+            Order.findOneAndUpdate(
+                { _id: orderId },
+                { quantity: quantity },
+                err => {
                     if (err) {
                         console.log(err);
                         return res
-                            .status(HttpStatusCodes.UNPROCESSABLE_ENTITY)
+                            .send(HttpStatusCodes.INTERNAL_SERVER_ERROR)
                             .json(err);
-                    } else {
-                        if (product.state > constants.PRODUCT_STATE["PLACED"]) {
-                            return res.send(HttpStatusCodes.BAD_REQUEST).json({
-                                error:
-                                    "You can't edit an order once it has been dispatched",
-                            });
-                        } else {
-                            const remaining =
-                                product.quantity - quantity + currentQuantity;
-                            if (remaining < 0) {
-                                return res
-                                    .status(HttpStatusCodes.BAD_REQUEST)
-                                    .json({
-                                        quantity:
-                                            "You cant order more than available",
-                                    });
-                            } else {
-                                Order.findOneAndUpdate(
-                                    { _id: orderId },
-                                    { quantity: quantity },
-                                    (err, doc) => {
-                                        if (err) {
-                                            console.log(err);
-                                            return res
-                                                .send(
-                                                    HttpStatusCodes.INTERNAL_SERVER_ERROR
-                                                )
-                                                .json(err);
-                                        } else {
-                                            const productUpdates = {
-                                                quantity: remaining,
-                                                state:
-                                                    remaining == 0
-                                                        ? constants
-                                                              .PRODUCT_STATE[
-                                                              "PLACED"
-                                                          ]
-                                                        : constants
-                                                              .PRODUCT_STATE[
-                                                              "WAITING"
-                                                          ],
-                                            };
-
-                                            Product.findOneAndUpdate(
-                                                { _id: product._id },
-                                                productUpdates,
-                                                (err, doc) => {
-                                                    if (err) {
-                                                        console.log(err);
-                                                        return res
-                                                            .send(
-                                                                HttpStatusCodes.INTERNAL_SERVER_ERROR
-                                                            )
-                                                            .json(err);
-                                                    } else {
-                                                        res.sendStatus(
-                                                            HttpStatusCodes.OK
-                                                        );
-                                                    }
-                                                }
-                                            );
-                                        }
-                                    }
-                                );
-                            }
-                        }
                     }
-                });
-            }
-        }
+
+                    const productUpdates = {
+                        quantity: remaining,
+                        state:
+                            remaining == 0
+                                ? constants.PRODUCT_STATE.PLACED
+                                : constants.PRODUCT_STATE.WAITING,
+                    };
+
+                    Product.findOneAndUpdate(
+                        { _id: product._id },
+                        productUpdates,
+                        err => {
+                            if (err) {
+                                console.log(err);
+                                return res
+                                    .send(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+                                    .json(err);
+                            }
+
+                            res.sendStatus(HttpStatusCodes.OK);
+                        }
+                    );
+                }
+            );
+        });
     });
 });
 

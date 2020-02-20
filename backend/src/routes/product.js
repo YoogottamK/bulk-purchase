@@ -26,9 +26,8 @@ router.get("/", (req, res) => {
         {
             vendorId: userDetails.id,
             quantity: { $gt: 0 },
-            state: { $ne: constants.PRODUCT_STATE["CANCELLED"] },
+            state: { $ne: constants.PRODUCT_STATE.CANCELLED },
         },
-        null,
         (err, docs) => {
             if (err) {
                 console.log(err);
@@ -70,8 +69,6 @@ router.post("/new", (req, res) => {
         .save()
         .then(product => res.json(product))
         .catch(err => console.log(err));
-
-    console.log(name, price, quantity, image, userDetails);
 });
 
 /*
@@ -87,7 +84,7 @@ router.get("/dispatchable", (req, res) => {
     Product.find(
         {
             vendorId: userDetails.id,
-            state: constants.PRODUCT_STATE["PLACED"],
+            state: constants.PRODUCT_STATE.PLACED,
         },
         (err, products) => {
             if (err) {
@@ -114,16 +111,16 @@ router.post("/dispatch", (req, res) => {
 
     Product.findOneAndUpdate(
         { _id: productId, vendorId: userDetails.id },
-        { state: constants.PRODUCT_STATE["DISPATCHED"] },
+        { state: constants.PRODUCT_STATE.DISPATCHED },
         (err, product) => {
             if (err) {
                 console.log(err);
                 return res
                     .send(HttpStatusCodes.INTERNAL_SERVER_ERROR)
                     .json(err);
-            } else {
-                res.json(product);
             }
+
+            res.json(product);
         }
     );
 });
@@ -141,7 +138,7 @@ router.get("/dispatched", (req, res) => {
     Product.find(
         {
             vendorId: userDetails.id,
-            state: constants.PRODUCT_STATE["DISPATCHED"],
+            state: constants.PRODUCT_STATE.DISPATCHED,
         },
         (err, product) => {
             if (err) {
@@ -149,9 +146,9 @@ router.get("/dispatched", (req, res) => {
                 return res
                     .send(HttpStatusCodes.INTERNAL_SERVER_ERROR)
                     .json(err);
-            } else {
-                res.json(product);
             }
+
+            res.json(product);
         }
     );
 });
@@ -168,15 +165,15 @@ router.delete("/:id", (req, res) => {
 
     Product.findOneAndUpdate(
         { _id: productId },
-        { state: constants.PRODUCT_STATE["CANCELLED"] },
+        { state: constants.PRODUCT_STATE.CANCELLED },
         (err, doc) => {
             if (err) {
                 return res
                     .send(HttpStatusCodes.INTERNAL_SERVER_ERROR)
                     .json(err);
-            } else {
-                res.json(doc);
             }
+
+            res.json(doc);
         }
     );
 });
