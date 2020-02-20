@@ -5,8 +5,8 @@ import { connect } from "react-redux";
 import { userLogout } from "../actions/authActions";
 
 // TODO: refactor this
-import VendorActions from "./VendorActions";
-import CustomerActions from "./CustomerActions";
+import VendorActions from "./vendor/VendorActions";
+import CustomerActions from "./customer/CustomerActions";
 
 class Home extends Component {
   render() {

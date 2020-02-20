@@ -2,8 +2,8 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 
-import CreateProduct from "./CreateProduct";
-import PlaceOrder from "./PlaceOrder";
+import CreateProduct from "./vendor/CreateProduct";
+import PlaceOrder from "./customer/PlaceOrder";
 
 class NewProduct extends Component {
   render() {

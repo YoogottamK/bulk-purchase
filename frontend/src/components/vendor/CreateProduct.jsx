@@ -11,7 +11,7 @@ import {
 import { Link } from "react-router-dom";
 import axios from "axios";
 
-import "../style/Form.css";
+import "../../style/Form.css";
 
 class CreateProduct extends Component {
   constructor() {

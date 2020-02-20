@@ -2,8 +2,8 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 
-import ViewProduct from "./ViewProduct";
-import ViewOrder from "./ViewOrder";
+import ViewProduct from "./vendor/ViewProduct";
+import ViewOrder from "./customer/ViewOrder";
 
 class MyOrder extends Component {
   render() {
