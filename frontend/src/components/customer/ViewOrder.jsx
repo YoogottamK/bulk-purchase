@@ -8,6 +8,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import { PRODUCT_STATE_REV } from "../../utils/constants";
 
 class ViewOrder extends Component {
   constructor() {
@@ -116,7 +117,9 @@ class ViewOrder extends Component {
                   />
                 </td>
                 <td className="align-middle">{order.productId.name}</td>
-                <td className="align-middle">{order.productId.state}</td>
+                <td className="align-middle">
+                  {PRODUCT_STATE_REV[order.productId.state]}
+                </td>
                 <td className="align-middle">{order.quantity}</td>
                 <td className="align-middle">{order.productId.quantity}</td>
                 <td className="align-middle">{order.rating}</td>
