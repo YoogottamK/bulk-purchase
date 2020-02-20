@@ -25,6 +25,9 @@ import _404 from "./components/_404";
 import NewOrder from "./components/NewOrder";
 import MyOrder from "./components/MyOrder";
 
+import ViewDispatchable from "./components/vendor/ViewDispatchable";
+import ViewDispatched from "./components/vendor/ViewDispatched";
+
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./style/App.css";
 
@@ -57,19 +60,18 @@ function App() {
             <LoggedInRoute exact path="/order/new" component={NewOrder} />
             <LoggedInRoute exact path="/order/my" component={MyOrder} />
 
-            {/* TODO: finish all fo this */}
             <RestrictedRoute
               exact
               path="/order/dispatchable"
               isVendorRoute
-              component={Home}
+              component={ViewDispatchable}
             />
 
             <RestrictedRoute
               exact
               path="/order/dispatched"
               isVendorRoute
-              component={Home}
+              component={ViewDispatched}
             />
 
             <Route component={_404} />

@@ -5,7 +5,7 @@ import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
 import axios from "axios";
 
-class ViewDispatchable extends Component {
+class ViewDispatched extends Component {
   constructor() {
     super();
 
@@ -14,30 +14,22 @@ class ViewDispatchable extends Component {
     };
   }
 
-  fetchDispatchable() {
+  fetchDispatched() {
     axios
-      .get("/product/dispatchable")
+      .get("/product/dispatched")
       .then(data => {
         this.setState({ products: data.data });
       })
       .catch(err => console.log(err));
   }
 
-  dispatchProduct(productId) {
-    axios
-      .post("/product/dispatch", { productId: productId })
-      .then(data => {})
-      .catch(err => console.log(err));
-
-    this.fetchDispatchable();
-  }
-
   // eslint-disable-next-line
   componentWillMount() {
-    this.fetchDispatchable();
+    this.fetchDispatched();
   }
 
   render() {
+    // TODO: review, rating, etc
     return (
       <Container>
         <div className="back py-3">
@@ -59,8 +51,6 @@ class ViewDispatchable extends Component {
               <th>Image</th>
               <th>Name</th>
               <th>Price</th>
-              <th>Quantity Left</th>
-              <th>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -76,15 +66,6 @@ class ViewDispatchable extends Component {
                 </td>
                 <td className="align-middle">{product.name}</td>
                 <td className="align-middle">{product.price}</td>
-                <td className="align-middle">{product.quantity}</td>
-                <td className="align-middle">
-                  <Button
-                    className="btn btn-primary"
-                    onClick={() => this.dispatchProduct(product._id)}
-                  >
-                    DISPATCH
-                  </Button>
-                </td>
               </tr>
             ))}
           </tbody>
@@ -94,4 +75,4 @@ class ViewDispatchable extends Component {
   }
 }
 
-export default ViewDispatchable;
+export default ViewDispatched;

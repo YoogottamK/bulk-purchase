@@ -60,7 +60,7 @@ class ViewProduct extends Component {
               <th>Name</th>
               <th>Price</th>
               <th>Quantity Left</th>
-              <th></th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
