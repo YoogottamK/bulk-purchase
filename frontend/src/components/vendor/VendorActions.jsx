@@ -4,10 +4,10 @@ import { Link } from "react-router-dom";
 
 const VendorActions = () => {
   const actions = [
-    { name: "Create order", link: "/order/new" },
-    { name: "View orders", link: "/order/my" },
-    { name: "View ready to dispatch orders", link: "/order/dispatchable" },
-    { name: "View dispatched orders", link: "/order/dispatched" },
+    { name: "Create product", link: "/order/new" },
+    { name: "View products", link: "/order/my" },
+    { name: "View ready to dispatch products", link: "/order/dispatchable" },
+    { name: "View dispatched products", link: "/order/dispatched" },
   ];
 
   return (
