@@ -157,7 +157,7 @@ class PlaceOrder extends Component {
               <th>Quantity Left</th>
               <th>Vendor</th>
               <th>Rating</th>
-              <th></th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>

@@ -102,7 +102,7 @@ class ViewOrder extends Component {
               <th>Quantity ordered</th>
               <th>Quantity Left</th>
               <th>Rating</th>
-              <th></th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
