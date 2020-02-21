@@ -2,6 +2,12 @@
 
 To run this, make sure you have npm
 
+Goto `./backend/src/config/`
+```
+cp secrets.js.example secrets.js
+```
+change the secrets key. This is for jwt
+
 ```
 cd frontend
 npm i
