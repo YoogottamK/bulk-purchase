@@ -32,8 +32,7 @@ class ViewProduct extends Component {
     this.fetchProducts();
   }
 
-  // eslint-disable-next-line
-  componentWillMount() {
+  componentDidMount() {
     this.fetchProducts();
   }
 

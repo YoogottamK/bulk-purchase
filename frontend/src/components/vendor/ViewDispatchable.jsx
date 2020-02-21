@@ -32,8 +32,7 @@ class ViewDispatchable extends Component {
     this.fetchDispatchable();
   }
 
-  // eslint-disable-next-line
-  componentWillMount() {
+  componentDidMount() {
     this.fetchDispatchable();
   }
 
