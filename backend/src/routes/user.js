@@ -8,7 +8,7 @@ const validateRegisterInput = require("../validation/register"),
     validateLoginInput = require("../validation/login");
 
 const User = require("../models/user"),
-    Product = require("../");
+    Product = require("../models/product");
 
 const secrets = require("../config/secrets");
 
@@ -106,8 +106,22 @@ router.post("/login", (req, res) => {
     });
 });
 
-router.get("/profile", (req, res) => {
+router.post("/profile", (req, res) => {
     const { id } = req.body;
+
+    Product.find({ vendorId: id })
+        .populate({ path: "reviews", model: "Review" })
+        .exec((err, product) => {
+            if (err) {
+                console.log(err);
+                return res
+                    .status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+                    .json(err);
+            }
+
+            console.log(product);
+            res.json(product);
+        });
 });
 
 module.exports = router;
