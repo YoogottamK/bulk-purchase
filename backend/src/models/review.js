@@ -5,9 +5,9 @@ const reviewSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
     },
-    description: String,
+    review: String,
 });
 
-const Review = mongoose.Model("Review", reviewSchema);
+const Review = mongoose.model("Review", reviewSchema);
 
 module.exports = Review;

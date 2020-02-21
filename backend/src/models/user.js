@@ -19,7 +19,7 @@ const userSchema = new mongoose.Schema({
         required: true,
     },
     rating: {
-        type: Number,
+        type: String,
         default: 0,
     },
     totalRating: {

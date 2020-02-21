@@ -4,7 +4,6 @@ import { Container } from "react-bootstrap";
 import { connect } from "react-redux";
 import { userLogout } from "../actions/authActions";
 
-// TODO: refactor this
 import VendorActions from "./vendor/VendorActions";
 import CustomerActions from "./customer/CustomerActions";
 

@@ -9,7 +9,8 @@ const validateAddOrderInput = require("../validation/addOrder"),
 
 const Product = require("../models/product"),
     Order = require("../models/order"),
-    User = require("../models/user");
+    User = require("../models/user"),
+    Review = require("../models/review");
 
 const constants = require("../config/constants");
 
@@ -209,7 +210,9 @@ router.post("/update", (req, res) => {
                             if (err) {
                                 console.log(err);
                                 return res
-                                    .send(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+                                    .status(
+                                        HttpStatusCodes.INTERNAL_SERVER_ERROR
+                                    )
                                     .json(err);
                             }
 
@@ -227,42 +230,157 @@ router.post("/update", (req, res) => {
  * @desc Gives a rating to the vendor
  * @access Restricted
  */
-router.get("/rate", (req, res) => {
+router.post("/rate", (req, res) => {
     console.log("---\n/order/rate\n", req.body, "\n---");
 
     const { errors, isValid } = validateRatingInput(req.body);
 
     if (!isValid) {
-        return res.send(HttpStatusCodes.UNPROCESSABLE_ENTITY).json(errors);
+        console.log(errors);
+        return res.status(HttpStatusCodes.UNPROCESSABLE_ENTITY).json(errors);
     }
 
-    const { orderId, userDetails } = req.body;
+    const { orderId, givenRating, userDetails } = req.body;
 
     Order.findOne({ _id: orderId }, (err, order) => {
         if (err) {
             console.log(err);
-            return res.send(HttpStatusCodes.INTERNAL_SERVER_ERROR).json(err);
+            return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json(err);
         }
 
-        const { vendorId, customerId } = order;
+        const { productId, customerId } = order;
 
         if (userDetails.id != customerId) {
-            return res.send(HttpStatusCodes.BAD_REQUEST).json({
+            return res.status(HttpStatusCodes.BAD_REQUEST).json({
                 error: "You can't rate an order which you didn't place",
             });
         }
 
-        User.findOne({ _id: vendorId, isVendor: true }, (err, user) => {
+        Product.findOne({ _id: productId }, (err, product) => {
             if (err) {
                 console.log(err);
                 return res
-                    .send(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+                    .status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
                     .json(err);
             }
 
-            const { rating, totalRating } = user;
+            const { vendorId } = product;
 
-            let total = rating * totalRating;
+            User.findOne({ _id: vendorId }, (err, user) => {
+                if (err) {
+                    console.log(err);
+                    return res
+                        .status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+                        .json(err);
+                }
+
+                let { rating, totalRating } = user;
+
+                let total = parseFloat(rating) * totalRating;
+                total += parseInt(givenRating);
+                totalRating += 1;
+
+                const updatedRaing = {
+                    rating: `${total / totalRating}`,
+                    totalRating: totalRating,
+                };
+
+                User.findOneAndUpdate({ _id: vendorId }, updatedRaing, err => {
+                    if (err) {
+                        console.log(err);
+                        return res
+                            .status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+                            .json(err);
+                    }
+                });
+
+                Order.findOneAndUpdate(
+                    { _id: orderId },
+                    { hasRatedVendor: true },
+                    err => {
+                        if (err) {
+                            console.log(err);
+                            return res
+                                .status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+                                .json(err);
+                        }
+                    }
+                );
+            });
+        });
+    });
+});
+
+/*
+ * @route POST /order/review
+ * @desc gives a review
+ * @access Restricted
+ */
+router.post("/review", (req, res) => {
+    console.log("---\n/order/review\n", req.body, "\n---");
+
+    const { orderId, review, userDetails } = req.body;
+
+    Order.findOne({ _id: orderId }, (err, order) => {
+        if (err) {
+            console.log(err);
+            return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json(err);
+        }
+
+        const { productId, customerId } = order;
+
+        if (userDetails.id != customerId) {
+            return res.status(HttpStatusCodes.BAD_REQUEST).json({
+                error: "You can't rate an order which you didn't place",
+            });
+        }
+
+        const newReview = new Review({
+            customerId: userDetails.id,
+            review: review,
+        });
+
+        newReview.save().then(review => {
+            Product.findOne({ _id: productId }, (err, product) => {
+                if (err) {
+                    console.log(err);
+                    return res
+                        .status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+                        .json(err);
+                }
+
+                const { reviews } = product;
+
+                reviews.push(review._id);
+
+                Product.findOneAndUpdate(
+                    { _id: productId },
+                    { reviews: reviews },
+                    err => {
+                        if (err) {
+                            console.log(err);
+                            return res
+                                .status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+                                .json(err);
+                        }
+
+                        Order.findOneAndUpdate(
+                            { _id: orderId },
+                            { hasReviewedProduct: true },
+                            err => {
+                                if (err) {
+                                    console.log(err);
+                                    return res
+                                        .status(
+                                            HttpStatusCodes.INTERNAL_SERVER_ERROR
+                                        )
+                                        .json(err);
+                                }
+                            }
+                        );
+                    }
+                );
+            });
         });
     });
 });

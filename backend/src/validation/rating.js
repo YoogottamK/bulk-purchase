@@ -4,13 +4,13 @@ const validator = require("validator"),
 module.exports = function validateRatingInput(data) {
     let errors = {};
 
-    data.rating = !isEmpty(data.rating) ? data.rating : "";
+    data.givenRating = !isEmpty(data.givenRating) ? data.givenRating : "";
 
-    if (validator.isEmpty(data.rating)) {
+    if (validator.isEmpty(data.givenRating)) {
         errors.rating = "Rating of the product is required";
     }
 
-    if (!validator.isInt(data.rating, { min: 1, max: 5 })) {
+    if (!validator.isInt(data.givenRating, { min: 1, max: 5 })) {
         errors.rating = "Rating should be a number from 1 to 5";
     }
 

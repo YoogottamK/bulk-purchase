@@ -5,6 +5,7 @@ import {
   faChevronLeft,
   faShoppingCart,
   faClone,
+  faPen,
 } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
 import axios from "axios";
@@ -21,6 +22,7 @@ class ViewOrder extends Component {
       isPerformingAction: false,
       orderId: -1,
       quantity: 1,
+      review: "",
       errors: {},
     };
 
@@ -28,6 +30,8 @@ class ViewOrder extends Component {
     this.onChange = this.onChange.bind(this);
     this.updateOrder = this.updateOrder.bind(this);
     this.reviewOrder = this.reviewOrder.bind(this);
+    this.manageRating = this.manageRating.bind(this);
+    this.postReview = this.postReview.bind(this);
   }
 
   fetchOrders() {
@@ -62,7 +66,7 @@ class ViewOrder extends Component {
   }
 
   onChange(e) {
-    this.setState({ quantity: e.target.value });
+    this.setState({ [e.target.id]: e.target.value });
   }
 
   updateOrder(e) {
@@ -88,8 +92,39 @@ class ViewOrder extends Component {
       .catch(err => console.log(err));
   }
 
+  postReview(e) {
+    e.preventDefault();
+
+    console.log(this.state.review);
+
+    const reviewDetails = {
+      orderId: this.state.orders[this.state.orderId]._id,
+      review: this.state.review,
+    };
+
+    axios
+      .post("/order/review", reviewDetails)
+      .then(data => console.log(data))
+      .catch(err => console.log(err));
+
+    this.fetchOrders();
+  }
+
   manageRating(newRating, name) {
-    const productIdx = parseInt(name);
+    const orderIdx = parseInt(name),
+      orderId = this.state.orders[orderIdx]._id;
+
+    const ratingData = {
+      orderId: orderId,
+      givenRating: `${newRating}`,
+    };
+
+    axios
+      .post("/order/rate", ratingData)
+      .then(data => console.log(data))
+      .catch(err => console.log(err.response.data));
+
+    this.fetchOrders();
   }
 
   render() {
@@ -148,13 +183,17 @@ class ViewOrder extends Component {
                       EDIT
                     </Button>
                   ) : order.productId.state === PRODUCT_STATE.DISPATCHED ? (
-                    <Button
-                      className="btn btn-primary"
-                      name={index}
-                      onClick={this.reviewOrder}
-                    >
-                      REVIEW
-                    </Button>
+                    order.hasReviewedProduct ? (
+                      <>Already reviewed</>
+                    ) : (
+                      <Button
+                        className="btn btn-primary"
+                        name={index}
+                        onClick={this.reviewOrder}
+                      >
+                        REVIEW
+                      </Button>
+                    )
                   ) : (
                     <></>
                   )}
@@ -253,30 +292,19 @@ class ViewOrder extends Component {
                   />
                 </Col>
               </Form.Group>
-              <Form.Group as={Row} controlId="quantity">
+              <Form.Group as={Row} controlId="review">
                 <Form.Label column xs="2">
-                  <FontAwesomeIcon icon={faClone} size="lg" />
+                  <FontAwesomeIcon icon={faPen} size="lg" />
                 </Form.Label>
                 <Col xs="10">
                   <Form.Control
                     className="form-input"
-                    type="number"
-                    placeholder="quantity"
+                    type="text"
+                    placeholder="review"
                     onChange={this.onChange}
-                    value={this.state.quantity}
-                    error={this.state.errors.quantity}
-                    min={1}
-                    max={
-                      parseInt(
-                        this.state.orders[this.state.orderId].productId.quantity
-                      ) +
-                      parseInt(this.state.orders[this.state.orderId].quantity)
-                    }
+                    value={this.state.review}
                     required
                   />
-                  <span className="text-danger text-right w-100 d-block">
-                    {this.state.errors.quantity}
-                  </span>
                 </Col>
               </Form.Group>
               <Row>
@@ -286,7 +314,7 @@ class ViewOrder extends Component {
                     type="submit"
                     className="form-submit w-50"
                   >
-                    Update order
+                    Review Order
                   </Button>
                 </Col>
               </Row>

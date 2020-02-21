@@ -6,7 +6,8 @@ const validateAddProductInput = require("../validation/addProduct"),
     tokenValidatorMiddleware = require("../validation/tokenValidatorMiddleware"),
     userTypeMiddleware = require("../validation/userTypeMiddleware");
 
-const Product = require("../models/product");
+const Product = require("../models/product"),
+    User = require("../models/user");
 
 const constants = require("../config/constants");
 
@@ -135,22 +136,22 @@ router.get("/dispatched", (req, res) => {
 
     const { userDetails } = req.body;
 
-    Product.find(
-        {
-            vendorId: userDetails.id,
-            state: constants.PRODUCT_STATE.DISPATCHED,
-        },
-        (err, product) => {
+    Product.find({
+        vendorId: userDetails.id,
+        state: constants.PRODUCT_STATE.DISPATCHED,
+    })
+        .populate({ path: "reviews", model: "Review" })
+        .exec((err, product) => {
             if (err) {
                 console.log(err);
                 return res
-                    .send(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+                    .status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
                     .json(err);
             }
 
+            console.log(product);
             res.json(product);
-        }
-    );
+        });
 });
 
 /*

@@ -18,18 +18,18 @@ class ViewDispatched extends Component {
     axios
       .get("/product/dispatched")
       .then(data => {
-        this.setState({ products: data.data });
+        this.setState({ products: data.data }, () =>
+          console.log(this.state.products)
+        );
       })
       .catch(err => console.log(err));
   }
 
-  // eslint-disable-next-line
-  componentWillMount() {
+  componentDidMount() {
     this.fetchDispatched();
   }
 
   render() {
-    // TODO: review, rating, etc
     return (
       <Container>
         <div className="back py-3">
@@ -51,6 +51,7 @@ class ViewDispatched extends Component {
               <th>Image</th>
               <th>Name</th>
               <th>Price</th>
+              <th>Reviews</th>
             </tr>
           </thead>
           <tbody>
@@ -66,6 +67,13 @@ class ViewDispatched extends Component {
                 </td>
                 <td className="align-middle">{product.name}</td>
                 <td className="align-middle">{product.price}</td>
+                <td className="align-middle">
+                  <ul>
+                    {product.reviews.map((review, index) => (
+                      <li key={index}>{review.review}</li>
+                    ))}
+                  </ul>
+                </td>
               </tr>
             ))}
           </tbody>
