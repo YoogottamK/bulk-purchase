@@ -26,7 +26,6 @@ const userSchema = new mongoose.Schema({
         type: Number,
         default: 0,
     },
-    reviews: [String],
 });
 
 const User = mongoose.model("User", userSchema);

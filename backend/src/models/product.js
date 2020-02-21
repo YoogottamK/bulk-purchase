@@ -22,9 +22,18 @@ const productSchema = new mongoose.Schema({
         ref: "User",
         required: true,
     },
-    rating: Number,
-    totalRating: Number,
-    reviews: [String],
+    rating: {
+        type: Number,
+        default: 0,
+    },
+    totalRating: {
+        type: Number,
+        default: 0,
+    },
+    reviews: {
+        type: [mongoose.Schema.Types.ObjectId],
+        ref: "Review",
+    },
     image: String,
 });
 
