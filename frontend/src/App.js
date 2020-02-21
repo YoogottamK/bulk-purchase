@@ -19,6 +19,7 @@ import Register from "./components/Register";
 import Login from "./components/Login";
 
 import Home from "./components/Home";
+import Profile from "./components/Profile";
 
 import _404 from "./components/_404";
 
@@ -73,6 +74,8 @@ function App() {
               isVendorRoute
               component={ViewDispatched}
             />
+
+            <LoggedInRoute path="/vendors/:id" component={Profile} />
 
             <Route component={_404} />
           </Switch>
