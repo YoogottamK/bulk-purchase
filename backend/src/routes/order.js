@@ -3,11 +3,13 @@ const express = require("express"),
     HttpStatusCodes = require("http-status-codes");
 
 const validateAddOrderInput = require("../validation/addOrder"),
+    validateRatingInput = require("../validation/rating"),
     tokenValidatorMiddleware = require("../validation/tokenValidatorMiddleware"),
     userTypeMiddleware = require("../validation/userTypeMiddleware");
 
 const Product = require("../models/product"),
-    Order = require("../models/order");
+    Order = require("../models/order"),
+    User = require("../models/user");
 
 const constants = require("../config/constants");
 
@@ -167,8 +169,8 @@ router.post("/update", (req, res) => {
                     .json(err);
             }
 
-            if (product.state > constants.PRODUCT_STATE["PLACED"]) {
-                return res.send(HttpStatusCodes.BAD_REQUEST).json({
+            if (product.state > constants.PRODUCT_STATE.PLACED) {
+                return res.status(HttpStatusCodes.UNPROCESSABLE_ENTITY).json({
                     error:
                         "You can't edit an order once it has been dispatched",
                 });
@@ -216,6 +218,51 @@ router.post("/update", (req, res) => {
                     );
                 }
             );
+        });
+    });
+});
+
+/*
+ * @route POST /order/rate
+ * @desc Gives a rating to the vendor
+ * @access Restricted
+ */
+router.get("/rate", (req, res) => {
+    console.log("---\n/order/rate\n", req.body, "\n---");
+
+    const { errors, isValid } = validateRatingInput(req.body);
+
+    if (!isValid) {
+        return res.send(HttpStatusCodes.UNPROCESSABLE_ENTITY).json(errors);
+    }
+
+    const { orderId, userDetails } = req.body;
+
+    Order.findOne({ _id: orderId }, (err, order) => {
+        if (err) {
+            console.log(err);
+            return res.send(HttpStatusCodes.INTERNAL_SERVER_ERROR).json(err);
+        }
+
+        const { vendorId, customerId } = order;
+
+        if (userDetails.id != customerId) {
+            return res.send(HttpStatusCodes.BAD_REQUEST).json({
+                error: "You can't rate an order which you didn't place",
+            });
+        }
+
+        User.findOne({ _id: vendorId, isVendor: true }, (err, user) => {
+            if (err) {
+                console.log(err);
+                return res
+                    .send(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+                    .json(err);
+            }
+
+            const { rating, totalRating } = user;
+
+            let total = rating * totalRating;
         });
     });
 });
