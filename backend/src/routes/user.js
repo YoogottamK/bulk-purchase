@@ -7,7 +7,8 @@ const express = require("express"),
 const validateRegisterInput = require("../validation/register"),
     validateLoginInput = require("../validation/login");
 
-const User = require("../models/user");
+const User = require("../models/user"),
+    Product = require("../");
 
 const secrets = require("../config/secrets");
 
@@ -103,6 +104,10 @@ router.post("/login", (req, res) => {
             }
         });
     });
+});
+
+router.get("/profile", (req, res) => {
+    const { id } = req.body;
 });
 
 module.exports = router;
