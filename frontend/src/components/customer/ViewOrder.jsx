@@ -8,7 +8,9 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import { PRODUCT_STATE_REV } from "../../utils/constants";
+import StarRatings from "react-star-ratings";
+
+import { PRODUCT_STATE, PRODUCT_STATE_REV } from "../../utils/constants";
 
 class ViewOrder extends Component {
   constructor() {
@@ -16,7 +18,7 @@ class ViewOrder extends Component {
 
     this.state = {
       orders: [],
-      isOrdering: false,
+      isPerformingAction: false,
       orderId: -1,
       quantity: 1,
       errors: {},
@@ -25,25 +27,35 @@ class ViewOrder extends Component {
     this.editOrder = this.editOrder.bind(this);
     this.onChange = this.onChange.bind(this);
     this.updateOrder = this.updateOrder.bind(this);
+    this.reviewOrder = this.reviewOrder.bind(this);
   }
 
   fetchOrders() {
     axios
       .get("/order/my")
       .then(data => {
-        this.setState({ orders: data.data });
+        this.setState({ orders: data.data }, () =>
+          console.log(this.state.orders)
+        );
       })
       .catch(err => console.log(err));
   }
 
-  // eslint-disable-next-line
-  componentWillMount() {
+  componentDidMount() {
     this.fetchOrders();
   }
 
   editOrder(e) {
     this.setState({
-      isOrdering: true,
+      isPerformingAction: true,
+      orderId: e.target.name,
+      quantity: this.state.orders[e.target.name].quantity,
+    });
+  }
+
+  reviewOrder(e) {
+    this.setState({
+      isPerformingAction: true,
       orderId: e.target.name,
       quantity: this.state.orders[e.target.name].quantity,
     });
@@ -67,13 +79,17 @@ class ViewOrder extends Component {
         alert("Order updated successfully");
 
         this.setState({
-          isOrdering: false,
+          isPerformingAction: false,
           orderId: -1,
         });
 
         this.fetchOrders();
       })
       .catch(err => console.log(err));
+  }
+
+  manageRating(newRating, name) {
+    const productIdx = parseInt(name);
   }
 
   render() {
@@ -101,8 +117,8 @@ class ViewOrder extends Component {
               <th>Status</th>
               <th>Quantity ordered</th>
               <th>Quantity Left</th>
-              <th>Rating</th>
               <th>Action</th>
+              <th>Rate vendor</th>
             </tr>
           </thead>
           <tbody>
@@ -122,9 +138,8 @@ class ViewOrder extends Component {
                 </td>
                 <td className="align-middle">{order.quantity}</td>
                 <td className="align-middle">{order.productId.quantity}</td>
-                <td className="align-middle">{order.rating}</td>
                 <td className="align-middle">
-                  {order.productId.state <= 1 ? (
+                  {order.productId.state <= PRODUCT_STATE.PLACED ? (
                     <Button
                       className="btn btn-primary"
                       name={index}
@@ -132,8 +147,35 @@ class ViewOrder extends Component {
                     >
                       EDIT
                     </Button>
+                  ) : order.productId.state === PRODUCT_STATE.DISPATCHED ? (
+                    <Button
+                      className="btn btn-primary"
+                      name={index}
+                      onClick={this.reviewOrder}
+                    >
+                      REVIEW
+                    </Button>
                   ) : (
                     <></>
+                  )}
+                </td>
+                <td className="align-middle">
+                  {order.productId.state >= PRODUCT_STATE.PLACED &&
+                  order.productId.state !== PRODUCT_STATE.CANCELLED ? (
+                    order.hasRatedVendor ? (
+                      <>Already rated</>
+                    ) : (
+                      <StarRatings
+                        starDimension="20px"
+                        starSpacing="1px"
+                        name={`${index}`}
+                        starRatedColor="rgb(255, 211, 0)"
+                        starHoverColor="rgb(255, 211, 0)"
+                        changeRating={this.manageRating}
+                      />
+                    )
+                  ) : (
+                    <>Cannot rate</>
                   )}
                 </td>
               </tr>
@@ -141,58 +183,115 @@ class ViewOrder extends Component {
           </tbody>
         </Table>
 
-        {this.state.isOrdering ? (
-          <Form className="text-center mx-auto" onSubmit={this.updateOrder}>
-            <Form.Group as={Row} controlId="name">
-              <Form.Label column xs="2">
-                <FontAwesomeIcon icon={faShoppingCart} size="lg" />
-              </Form.Label>
-              <Col xs="10">
-                <Form.Control
-                  className="form-input"
-                  type="text"
-                  value={this.state.orders[this.state.orderId].productId.name}
-                  disabled
-                />
-              </Col>
-            </Form.Group>
-            <Form.Group as={Row} controlId="quantity">
-              <Form.Label column xs="2">
-                <FontAwesomeIcon icon={faClone} size="lg" />
-              </Form.Label>
-              <Col xs="10">
-                <Form.Control
-                  className="form-input"
-                  type="number"
-                  placeholder="quantity"
-                  onChange={this.onChange}
-                  value={this.state.quantity}
-                  error={this.state.errors.quantity}
-                  min={1}
-                  max={
-                    parseInt(
-                      this.state.orders[this.state.orderId].productId.quantity
-                    ) + parseInt(this.state.orders[this.state.orderId].quantity)
-                  }
-                  required
-                />
-                <span className="text-danger text-right w-100 d-block">
-                  {this.state.errors.quantity}
-                </span>
-              </Col>
-            </Form.Group>
-            <Row>
-              <Col>
-                <Button
-                  variant="primary"
-                  type="submit"
-                  className="form-submit w-50"
-                >
-                  Update order
-                </Button>
-              </Col>
-            </Row>
-          </Form>
+        {this.state.isPerformingAction ? (
+          this.state.orders[this.state.orderId].productId.state <=
+          PRODUCT_STATE.PLACED ? (
+            <Form className="text-center mx-auto" onSubmit={this.updateOrder}>
+              <Form.Group as={Row} controlId="name">
+                <Form.Label column xs="2">
+                  <FontAwesomeIcon icon={faShoppingCart} size="lg" />
+                </Form.Label>
+                <Col xs="10">
+                  <Form.Control
+                    className="form-input"
+                    type="text"
+                    value={this.state.orders[this.state.orderId].productId.name}
+                    disabled
+                  />
+                </Col>
+              </Form.Group>
+              <Form.Group as={Row} controlId="quantity">
+                <Form.Label column xs="2">
+                  <FontAwesomeIcon icon={faClone} size="lg" />
+                </Form.Label>
+                <Col xs="10">
+                  <Form.Control
+                    className="form-input"
+                    type="number"
+                    placeholder="quantity"
+                    onChange={this.onChange}
+                    value={this.state.quantity}
+                    error={this.state.errors.quantity}
+                    min={1}
+                    max={
+                      parseInt(
+                        this.state.orders[this.state.orderId].productId.quantity
+                      ) +
+                      parseInt(this.state.orders[this.state.orderId].quantity)
+                    }
+                    required
+                  />
+                  <span className="text-danger text-right w-100 d-block">
+                    {this.state.errors.quantity}
+                  </span>
+                </Col>
+              </Form.Group>
+              <Row>
+                <Col>
+                  <Button
+                    variant="primary"
+                    type="submit"
+                    className="form-submit w-50"
+                  >
+                    Update order
+                  </Button>
+                </Col>
+              </Row>
+            </Form>
+          ) : (
+            <Form className="text-center mx-auto" onSubmit={this.postReview}>
+              <Form.Group as={Row} controlId="name">
+                <Form.Label column xs="2">
+                  <FontAwesomeIcon icon={faShoppingCart} size="lg" />
+                </Form.Label>
+                <Col xs="10">
+                  <Form.Control
+                    className="form-input"
+                    type="text"
+                    value={this.state.orders[this.state.orderId].productId.name}
+                    disabled
+                  />
+                </Col>
+              </Form.Group>
+              <Form.Group as={Row} controlId="quantity">
+                <Form.Label column xs="2">
+                  <FontAwesomeIcon icon={faClone} size="lg" />
+                </Form.Label>
+                <Col xs="10">
+                  <Form.Control
+                    className="form-input"
+                    type="number"
+                    placeholder="quantity"
+                    onChange={this.onChange}
+                    value={this.state.quantity}
+                    error={this.state.errors.quantity}
+                    min={1}
+                    max={
+                      parseInt(
+                        this.state.orders[this.state.orderId].productId.quantity
+                      ) +
+                      parseInt(this.state.orders[this.state.orderId].quantity)
+                    }
+                    required
+                  />
+                  <span className="text-danger text-right w-100 d-block">
+                    {this.state.errors.quantity}
+                  </span>
+                </Col>
+              </Form.Group>
+              <Row>
+                <Col>
+                  <Button
+                    variant="primary"
+                    type="submit"
+                    className="form-submit w-50"
+                  >
+                    Update order
+                  </Button>
+                </Col>
+              </Row>
+            </Form>
+          )
         ) : (
           <></>
         )}

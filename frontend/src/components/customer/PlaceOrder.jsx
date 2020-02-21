@@ -56,8 +56,7 @@ class PlaceOrder extends Component {
       .catch(err => console.log(err));
   }
 
-  // eslint-disable-next-line
-  componentWillMount() {
+  componentDidMount() {
     this.fetchOrders();
   }
 
